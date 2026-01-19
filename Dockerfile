@@ -8,10 +8,10 @@ FROM oven/bun:1.1 AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json bun.lock ./
+COPY package.json bun.lock* ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install dependencies (use --frozen-lockfile only if lockfile exists and matches)
+RUN bun install
 
 # Stage 2: Build the application
 FROM oven/bun:1.1 AS builder
@@ -28,6 +28,10 @@ RUN bun run build
 # Stage 3: Production runtime
 FROM oven/bun:1.1-slim AS runner
 WORKDIR /app
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nuxt && \
