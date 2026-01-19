@@ -13,11 +13,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+  <div class="video-background">
     <!-- Video Background -->
     <video
       ref="videoRef"
-      class="absolute inset-0 w-full h-full object-cover"
       autoplay
       loop
       muted
@@ -28,21 +27,49 @@ onMounted(() => {
     </video>
     
     <!-- Dark overlay for better readability -->
-    <div class="absolute inset-0 bg-charcoal/70" />
+    <div class="overlay bg-charcoal/70" />
     
     <!-- Subtle vignette effect -->
     <div 
-      class="absolute inset-0"
+      class="overlay"
       style="background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%);"
     />
     
     <!-- Optional grim color tint -->
-    <div class="absolute inset-0 bg-gradient-to-b from-charcoal/30 via-transparent to-crimson/10" />
+    <div class="overlay bg-gradient-to-b from-charcoal/30 via-transparent to-crimson/10" />
   </div>
 </template>
 
 <style scoped>
-video {
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.video-background video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
   filter: grayscale(0.3) contrast(1.1);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>
