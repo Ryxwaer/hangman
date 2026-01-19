@@ -3,54 +3,50 @@
 
 // Large ASCII pentagram made from characters
 const PENTAGRAM = `
-                                        .
-                                       /|\\
-                                      / | \\
-                                     /  |  \\
-                                    /   |   \\
-                                   /    |    \\
-                                  /     |     \\
-                                 /      |      \\
-                                /       |       \\
-                               /        |        \\
-                              /         |         \\
-                             /          |          \\
-                            /           |           \\
-                           /            |            \\
-                          /             |             \\
-                         /              |              \\
-                        /               |               \\
-                       /                |                \\
-                      /                 |                 \\
-                     /                  |                  \\
-          __________/___________________+___________________\\__________
-                    \\                                      /
-                     \\                                    /
-                      \\                                  /
-                       \\                                /
-                        \\                              /
-                         \\                            /
-                          \\                          /
-                           \\                        /
-                            \\          .           /
-                             \\        /|\\         /
-                              \\      / | \\       /
-                               \\    /  |  \\     /
-                                \\  /   |   \\   /
-                                 \\/    |    \\ /
-                                  \\    |    //
-                                   \\   |   //
-                                    \\  |  //
-                                     \\ | //
-                                      \\|//
-                                       V
+                                             ▲
+                                            /█\\
+                                           / █ \\
+                                          /  █  \\
+                                         /   █   \\
+                                        /    █    \\
+                                       /     █     \\
+                                      /      █      \\
+                                     /       █       \\
+                                    /        █        \\
+                                   /         █         \\
+                                  /          █          \\
+                                 /           █           \\
+                                /            █            \\
+                               /             █             \\
+                              /              █              \\
+                             /               █               \\
+                            /                █                \\
+           ════════════════/═════════════════█═════════════════\\════════════════
+                           \\                                   /
+                            \\                                 /
+                             \\                               /
+                              \\                             /
+                               \\                           /
+                                \\                         /
+                                 \\                       /
+                                  \\         ▼           /
+                                   \\       /█\\         /
+                                    \\     / █ \\       /
+                                     \\   /  █  \\     /
+                                      \\ /   █   \\   /
+                                       X    █    \\ /
+                                      / \\   █   / \\
+                                     /   \\  █  /   \\
+                                    /     \\ █ /     \\
+                                   /       \\█/       \\
+                                  ▼═════════█═════════▼
 `
 
-// Outer circle runes
-const RUNES = '᛫ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ᛫'
+// Circular text for rune rings
+const RUNES_OUTER = '᛫ᚠ᛫ᚢ᛫ᚦ᛫ᚨ᛫ᚱ᛫ᚲ᛫ᚷ᛫ᚹ᛫ᚺ᛫ᚾ᛫ᛁ᛫ᛃ᛫ᛇ᛫ᛈ᛫ᛉ᛫ᛊ᛫ᛏ᛫ᛒ᛫ᛖ᛫ᛗ᛫ᛚ᛫ᛜ᛫ᛞ᛫ᛟ᛫'
 
 // Floating occult symbols
-const OCCULT_SYMBOLS = ['☠', '†', '‡', '⛧', '✝', '☽', '☾', '◊', '∞', '⚰', '✞', '⁂', '※', '⌖', '◈']
+const OCCULT_SYMBOLS = ['☠', '†', '‡', '⛧', '✝', '☽', '☾', '◊', '∞', '⚰', '✞', '⁂', '※', '⌖', '◈', '⛤', '☥', '♱']
 
 interface FloatingSymbol {
   id: number
@@ -63,19 +59,40 @@ interface FloatingSymbol {
   opacity: number
 }
 
+interface RuneChar {
+  char: string
+  angle: number
+}
+
 const floatingSymbols = ref<FloatingSymbol[]>([])
-const runeRotation = ref(0)
+
+// Generate rune positions in a circle
+const outerRunes = computed<RuneChar[]>(() => {
+  const chars = RUNES_OUTER.split('')
+  return chars.map((char, i) => ({
+    char,
+    angle: (360 / chars.length) * i,
+  }))
+})
+
+const innerRunes = computed<RuneChar[]>(() => {
+  const chars = RUNES_OUTER.split('').reverse()
+  return chars.map((char, i) => ({
+    char,
+    angle: (360 / chars.length) * i,
+  }))
+})
 
 function generateSymbols() {
-  floatingSymbols.value = Array.from({ length: 40 }, (_, i) => ({
+  floatingSymbols.value = Array.from({ length: 50 }, (_, i) => ({
     id: i,
     symbol: OCCULT_SYMBOLS[Math.floor(Math.random() * OCCULT_SYMBOLS.length)],
     x: Math.random() * 100,
     y: Math.random() * 100,
-    size: 0.6 + Math.random() * 1.2,
+    size: 0.8 + Math.random() * 1.5,
     delay: Math.random() * 15,
     duration: 20 + Math.random() * 30,
-    opacity: 0.1 + Math.random() * 0.15,
+    opacity: 0.15 + Math.random() * 0.2,
   }))
 }
 
@@ -87,34 +104,43 @@ onMounted(() => {
 <template>
   <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
     <!-- Base gradient -->
-    <div class="absolute inset-0 bg-gradient-radial from-charcoal-light via-charcoal to-charcoal-dark" />
+    <div class="absolute inset-0 bg-gradient-radial" />
 
     <!-- Outer rotating rune circle -->
     <div class="absolute inset-0 flex items-center justify-center">
-      <div 
-        class="rune-circle text-ash select-none"
-        style="font-size: 1.2rem; letter-spacing: 0.8em;"
-      >
-        {{ RUNES }}{{ RUNES }}
+      <div class="rune-ring rune-ring-outer">
+        <span
+          v-for="(rune, index) in outerRunes"
+          :key="`outer-${index}`"
+          class="rune-char"
+          :style="{
+            transform: `rotate(${rune.angle}deg) translateY(-42vmin) rotate(-${rune.angle}deg)`,
+          }"
+        >
+          {{ rune.char }}
+        </span>
       </div>
     </div>
 
     <!-- Inner rotating rune circle (opposite direction) -->
     <div class="absolute inset-0 flex items-center justify-center">
-      <div 
-        class="rune-circle-reverse text-ash-dark select-none"
-        style="font-size: 0.9rem; letter-spacing: 0.6em;"
-      >
-        {{ RUNES }}
+      <div class="rune-ring rune-ring-inner">
+        <span
+          v-for="(rune, index) in innerRunes"
+          :key="`inner-${index}`"
+          class="rune-char-inner"
+          :style="{
+            transform: `rotate(${rune.angle}deg) translateY(-32vmin) rotate(-${rune.angle}deg)`,
+          }"
+        >
+          {{ rune.char }}
+        </span>
       </div>
     </div>
 
     <!-- Central pentagram -->
     <div class="absolute inset-0 flex items-center justify-center">
-      <pre 
-        class="pentagram text-crimson-dark select-none leading-none"
-        style="font-size: clamp(0.15rem, 0.5vw, 0.35rem); opacity: 0.25;"
-      >{{ PENTAGRAM }}</pre>
+      <pre class="pentagram select-none">{{ PENTAGRAM }}</pre>
     </div>
 
     <!-- Pulsing glow behind pentagram -->
@@ -134,85 +160,73 @@ onMounted(() => {
         animationDelay: `${sym.delay}s`,
         animationDuration: `${sym.duration}s`,
         opacity: sym.opacity,
-        color: sym.id % 3 === 0 ? 'var(--color-crimson-dark)' : 'var(--color-ash)',
+        color: sym.id % 4 === 0 ? 'var(--color-crimson)' : 'var(--color-ash)',
       }"
     >
       {{ sym.symbol }}
     </div>
 
-    <!-- Corner decorations -->
-    <div class="absolute top-4 left-4 text-ash opacity-20 text-xs font-mono select-none">
-      <pre>╔══════╗
-║ ⛧  ⛧ ║
-║  ☠   ║
-╚══════╝</pre>
+    <!-- Corner pentagrams -->
+    <div class="absolute top-6 left-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
+    <div class="absolute top-6 right-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
+    <div class="absolute bottom-6 left-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
+    <div class="absolute bottom-6 right-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
+
+    <!-- Edge runes -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 text-ash opacity-20 text-sm tracking-[0.5em] select-none">
+      ᛟ᛫ᚠᚢᚦᚨᚱᚲ᛫ᛟ
     </div>
-    <div class="absolute top-4 right-4 text-ash opacity-20 text-xs font-mono select-none">
-      <pre>╔══════╗
-║ ⛧  ⛧ ║
-║  ☠   ║
-╚══════╝</pre>
-    </div>
-    <div class="absolute bottom-4 left-4 text-ash opacity-20 text-xs font-mono select-none">
-      <pre>╚══════╝
-║  ☠   ║
-║ ⛧  ⛧ ║
-╔══════╗</pre>
-    </div>
-    <div class="absolute bottom-4 right-4 text-ash opacity-20 text-xs font-mono select-none">
-      <pre>╚══════╝
-║  ☠   ║
-║ ⛧  ⛧ ║
-╔══════╗</pre>
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-ash opacity-20 text-sm tracking-[0.5em] select-none">
+      ᛟ᛫ᚠᚢᚦᚨᚱᚲ᛫ᛟ
     </div>
 
     <!-- Scanline effect -->
     <div class="absolute inset-0 scanlines" />
 
     <!-- Fog/mist at bottom -->
-    <div class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent" />
+    <div class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-charcoal via-charcoal/60 to-transparent" />
 
     <!-- Vignette -->
-    <div 
-      class="absolute inset-0"
-      style="background: radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(0,0,0,0.6) 100%);"
-    />
+    <div class="absolute inset-0 vignette" />
   </div>
 </template>
 
 <style scoped>
 .bg-gradient-radial {
-  background: radial-gradient(ellipse at center, var(--color-charcoal-light) 0%, var(--color-charcoal) 50%, var(--color-charcoal-dark) 100%);
+  background: 
+    radial-gradient(ellipse at center, rgba(139, 0, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at center, var(--color-charcoal-light) 0%, var(--color-charcoal) 40%, var(--color-charcoal-dark) 100%);
 }
 
-/* Rotating rune circles */
-.rune-circle {
-  position: absolute;
-  width: 80vmin;
-  height: 80vmin;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: rotateRunes 120s linear infinite;
-  opacity: 0.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: clip;
+/* Rune ring container */
+.rune-ring {
+  position: relative;
+  width: 1px;
+  height: 1px;
 }
 
-.rune-circle-reverse {
+.rune-ring-outer {
+  animation: rotateRunes 180s linear infinite;
+}
+
+.rune-ring-inner {
+  animation: rotateRunesReverse 120s linear infinite;
+}
+
+.rune-char {
   position: absolute;
-  width: 60vmin;
-  height: 60vmin;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: rotateRunesReverse 90s linear infinite;
-  opacity: 0.1;
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: 1.8rem;
+  color: var(--color-bone-muted);
+  opacity: 0.5;
+  text-shadow: 0 0 15px var(--color-crimson);
+}
+
+.rune-char-inner {
+  position: absolute;
+  font-size: 1.3rem;
+  color: var(--color-crimson);
+  opacity: 0.4;
+  text-shadow: 0 0 10px var(--color-crimson-dark);
 }
 
 @keyframes rotateRunes {
@@ -227,43 +241,52 @@ onMounted(() => {
 
 /* Pentagram styling */
 .pentagram {
-  animation: pentagramPulse 8s ease-in-out infinite;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(0.35rem, 1vw, 0.7rem);
+  line-height: 1.1;
+  color: var(--color-crimson);
+  opacity: 0.6;
+  animation: pentagramPulse 6s ease-in-out infinite;
+  text-shadow: 0 0 40px var(--color-crimson), 0 0 80px var(--color-crimson-dark);
+  white-space: pre;
 }
 
 @keyframes pentagramPulse {
   0%, 100% { 
-    opacity: 0.2;
-    filter: blur(0px);
+    opacity: 0.25;
+    text-shadow: 0 0 10px var(--color-crimson-dark);
   }
   50% { 
-    opacity: 0.35;
-    filter: blur(0.5px);
+    opacity: 0.45;
+    text-shadow: 0 0 30px var(--color-crimson), 0 0 60px var(--color-crimson-dark);
   }
 }
 
 /* Glow effect */
 .pentagram-glow {
-  width: 40vmin;
-  height: 40vmin;
+  width: 50vmin;
+  height: 50vmin;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(139, 0, 0, 0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(139, 0, 0, 0.15) 0%, transparent 60%);
   animation: glowPulse 6s ease-in-out infinite;
+  filter: blur(20px);
 }
 
 @keyframes glowPulse {
   0%, 100% { 
-    transform: scale(1);
+    transform: scale(0.9);
     opacity: 0.3;
   }
   50% { 
     transform: scale(1.1);
-    opacity: 0.5;
+    opacity: 0.6;
   }
 }
 
 /* Floating symbols */
 .floating-symbol {
   animation: floatOccult 25s ease-in-out infinite;
+  text-shadow: 0 0 5px currentColor;
 }
 
 @keyframes floatOccult {
@@ -271,13 +294,13 @@ onMounted(() => {
     transform: translateY(0) translateX(0) rotate(0deg);
   }
   25% {
-    transform: translateY(-40px) translateX(20px) rotate(10deg);
+    transform: translateY(-50px) translateX(25px) rotate(15deg);
   }
   50% {
-    transform: translateY(-20px) translateX(-15px) rotate(-5deg);
+    transform: translateY(-25px) translateX(-20px) rotate(-10deg);
   }
   75% {
-    transform: translateY(-60px) translateX(10px) rotate(5deg);
+    transform: translateY(-70px) translateX(15px) rotate(8deg);
   }
 }
 
@@ -287,10 +310,25 @@ onMounted(() => {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.1) 2px,
-    rgba(0, 0, 0, 0.1) 4px
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
   );
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.4;
+}
+
+/* Vignette */
+.vignette {
+  background: radial-gradient(ellipse at center, transparent 0%, transparent 30%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Pulse animation for corners */
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.4; }
 }
 </style>
