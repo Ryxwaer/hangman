@@ -3,6 +3,7 @@
 ## Tech Stack
 
 - **Nuxt 4** with TypeScript
+- **Bun** as package manager
 - **Tailwind CSS 4** with custom grim color palette
 - **Google Gemini API** for AI yes/no questions
 

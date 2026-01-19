@@ -1,0 +1,24 @@
+{
+  "name": "hangman",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.9",
+    "nuxt": "^3.17",
+    "pinia": "^2.3",
+    "vue": "^3.5"
+  },
+  "devDependencies": {
+    "@nuxtjs/google-fonts": "^3",
+    "@tailwindcss/vite": "^4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

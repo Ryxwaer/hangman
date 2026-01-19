@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.nuxt/
+.output/
+dist/
+
+# Lock files (large, auto-generated)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+
+# TypeScript build info
+*.tsbuildinfo
