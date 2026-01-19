@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Build outputs
 .nuxt/
@@ -16,6 +17,7 @@ dist/
 .idea/
 *.swp
 *.swo
+.cursor/
 
 # OS
 .DS_Store
@@ -30,6 +32,13 @@ npm-debug.log*
 
 # Testing
 coverage/
+__tests__/
 
 # Misc
 *.local
+
+# Bun
+.bun/
+
+# Docker (optional - uncomment if you don't want to commit)
+# docker-compose.override.yml

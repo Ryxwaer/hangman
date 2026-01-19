@@ -8,7 +8,8 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
-  devtools: { enabled: true },
+  // Disable devtools in production
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
 
   modules: [
     '@nuxtjs/google-fonts',
@@ -36,9 +37,30 @@ export default defineNuxtConfig({
     head: {
       title: 'Hangman - ASCII Horror',
       meta: [
-        { name: 'description', content: 'A grim ASCII hangman game' },
-        { name: 'theme-color', content: '#0d0d0d' },
+        { name: 'description', content: 'A grim ASCII hangman game with AI-powered hints' },
+        // Theme color for all platforms
+        { name: 'theme-color', content: '#000000' },
+        { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#000000' },
+        { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#000000' },
+        // iOS Safari
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        // Microsoft
+        { name: 'msapplication-TileColor', content: '#000000' },
+        { name: 'msapplication-navbutton-color', content: '#000000' },
+        // Viewport
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        // Color scheme
+        { name: 'color-scheme', content: 'dark' },
       ],
+      htmlAttrs: {
+        lang: 'en',
+      },
     },
+  },
+
+  // Nitro server configuration
+  nitro: {
+    compressPublicAssets: true,
   },
 })

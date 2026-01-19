@@ -1,9 +1,8 @@
 import { defineEventHandler, readBody, createError } from 'h3'
-import { getQuestionPrompt } from '../utils/prompts'
+import { getWordExplanationPrompt } from '../utils/prompts'
 
-interface AskAiRequest {
+interface ExplainWordRequest {
   word: string
-  question: string
 }
 
 interface GeminiResponse {
@@ -30,16 +29,16 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const body = await readBody<AskAiRequest>(event)
+  const body = await readBody<ExplainWordRequest>(event)
 
-  if (!body.word || !body.question) {
+  if (!body.word) {
     throw createError({
       statusCode: 400,
-      message: 'Missing word or question',
+      message: 'Missing word',
     })
   }
 
-  const prompt = getQuestionPrompt(body.word, body.question)
+  const prompt = getWordExplanationPrompt(body.word)
 
   try {
     const response = await fetch(
@@ -57,8 +56,8 @@ export default defineEventHandler(async (event) => {
             },
           ],
           generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 50,
+            temperature: 0.5,
+            maxOutputTokens: 300,
           },
         }),
       }
@@ -70,7 +69,7 @@ export default defineEventHandler(async (event) => {
     if (response.status === 429 || (data.error?.message && data.error.message.includes('quota'))) {
       throw createError({
         statusCode: 429,
-        message: 'The spirits are exhausted... Please wait a minute before asking again.',
+        message: 'The spirits are exhausted... Please wait a moment.',
       })
     }
 
@@ -81,9 +80,9 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const answer = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Unknown'
+    const explanation = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'No explanation available.'
 
-    return { answer }
+    return { explanation }
   } catch (error: any) {
     console.error('Gemini API error:', error)
     
@@ -94,7 +93,7 @@ export default defineEventHandler(async (event) => {
     
     throw createError({
       statusCode: 500,
-      message: error.message || 'Failed to get AI response',
+      message: error.message || 'Failed to get explanation',
     })
   }
 })

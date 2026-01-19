@@ -32,6 +32,12 @@ function handleKeyClick(letter: string) {
 
 // Physical keyboard support
 function handleKeyDown(event: KeyboardEvent) {
+  // Ignore if user is typing in an input field
+  const target = event.target as HTMLElement
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+    return
+  }
+  
   const key = event.key.toUpperCase()
   if (/^[A-Z]$/.test(key) && !props.guessedLetters.has(key)) {
     emit('guess', key)

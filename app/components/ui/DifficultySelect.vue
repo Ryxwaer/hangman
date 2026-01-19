@@ -49,17 +49,5 @@ function selectDifficulty(difficulty: Difficulty) {
         />
       </button>
     </div>
-    
-    <!-- Decorative skull -->
-    <pre class="text-ash text-xs mt-8 select-none">
-    .---.
-   /     \
-   \.@-@./
-   /`\_/`\
-  //  _  \\
- | \     / |
-  \|  |  |/
-   |__|__|
-    </pre>
   </div>
 </template>

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useGameStore } from '~/stores/game'
+import { useTypewriter } from '~/composables/useTypewriter'
 
 const gameStore = useGameStore()
 const isOpen = ref(false)
 const question = ref('')
 const isLoading = ref(false)
 const error = ref('')
+const historyContainer = ref<HTMLElement | null>(null)
 
 interface QAPair {
   question: string
@@ -13,6 +15,23 @@ interface QAPair {
 }
 
 const history = ref<QAPair[]>([])
+
+// Typewriter for latest answer
+const { displayedText: typedAnswer, isTyping, type: typeAnswer, reset: resetTypewriter } = useTypewriter(25)
+const typingForIndex = ref<number | null>(null)
+
+// Auto-scroll to bottom when history changes
+function scrollToBottom() {
+  nextTick(() => {
+    if (historyContainer.value) {
+      historyContainer.value.scrollTop = historyContainer.value.scrollHeight
+    }
+  })
+}
+
+watch(history, scrollToBottom, { deep: true })
+watch(isLoading, scrollToBottom)
+watch(typedAnswer, scrollToBottom)
 
 async function askQuestion() {
   if (!question.value.trim() || isLoading.value) return
@@ -35,6 +54,10 @@ async function askQuestion() {
       question: currentQuestion,
       answer: response.answer,
     })
+    
+    // Start typewriter for the new answer
+    typingForIndex.value = history.value.length - 1
+    typeAnswer(response.answer)
   } catch (err: any) {
     error.value = err.data?.message || 'Failed to get answer'
     console.error('AI Error:', err)
@@ -47,10 +70,24 @@ function togglePanel() {
   isOpen.value = !isOpen.value
 }
 
+// Get displayed answer - typewriter for latest, full text for others
+function getAnswer(index: number): string {
+  if (typingForIndex.value === index) {
+    return typedAnswer.value
+  }
+  return history.value[index]?.answer || ''
+}
+
+function isTypingAnswer(index: number): boolean {
+  return typingForIndex.value === index && isTyping.value
+}
+
 // Reset history when game restarts
 watch(() => gameStore.gameState, (state) => {
   if (state === 'idle') {
     history.value = []
+    resetTypewriter()
+    typingForIndex.value = null
   }
 })
 </script>
@@ -82,17 +119,18 @@ watch(() => gameStore.gameState, (state) => {
         </div>
         
         <!-- History -->
-        <div class="flex-1 overflow-y-auto p-3 space-y-3">
+        <div ref="historyContainer" class="flex-1 overflow-y-auto p-3 space-y-3">
           <div
             v-for="(qa, index) in history"
             :key="index"
-            class="text-sm animate-fade-in"
+            class="text-sm"
           >
-            <p class="text-bone-muted">
+            <p class="text-bone-muted motion-preset-fade motion-duration-300">
               <span class="text-bone">Q:</span> {{ qa.question }}
             </p>
             <p class="text-moss font-bold mt-1">
-              <span class="text-bone">A:</span> {{ qa.answer }}
+              <span class="text-bone">A:</span> 
+              {{ getAnswer(index) }}<span v-if="isTypingAnswer(index)" class="inline-block w-1.5 h-3 bg-moss ml-0.5 animate-pulse" />
             </p>
           </div>
           
@@ -102,7 +140,7 @@ watch(() => gameStore.gameState, (state) => {
           </div>
           
           <!-- Error -->
-          <div v-if="error" class="text-crimson text-sm">
+          <div v-if="error" class="text-crimson text-sm motion-preset-shake">
             {{ error }}
           </div>
           

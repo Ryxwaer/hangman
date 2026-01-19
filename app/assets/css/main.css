@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin 'tailwindcss-motion';
 
 /* Grim color palette theme */
 @theme {
@@ -46,12 +47,17 @@
 
 /* Base styles */
 @layer base {
+  /* Ensure black background everywhere (iOS overscroll, Android, etc.) */
+  html {
+    background-color: #000000;
+  }
+
   body {
-    @apply bg-charcoal text-bone font-mono antialiased;
-    background-image: 
-      radial-gradient(ellipse at top, rgba(58, 58, 58, 0.3) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom, rgba(139, 0, 0, 0.1) 0%, transparent 50%);
+    @apply text-bone font-mono antialiased;
+    /* Background is transparent to show video behind */
+    background: transparent;
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
   }
 
   ::selection {
