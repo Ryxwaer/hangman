@@ -1,311 +1,428 @@
 <script setup lang="ts">
-// ASCII Pentagram and occult symbols background
+// System Bleed Glitch Style Background - Inspired by The Glitch Mob
 
-// Large ASCII pentagram made from characters
-const PENTAGRAM = `
-                                             ▲
-                                            /█\\
-                                           / █ \\
-                                          /  █  \\
-                                         /   █   \\
-                                        /    █    \\
-                                       /     █     \\
-                                      /      █      \\
-                                     /       █       \\
-                                    /        █        \\
-                                   /         █         \\
-                                  /          █          \\
-                                 /           █           \\
-                                /            █            \\
-                               /             █             \\
-                              /              █              \\
-                             /               █               \\
-                            /                █                \\
-           ════════════════/═════════════════█═════════════════\\════════════════
-                           \\                                   /
-                            \\                                 /
-                             \\                               /
-                              \\                             /
-                               \\                           /
-                                \\                         /
-                                 \\                       /
-                                  \\         ▼           /
-                                   \\       /█\\         /
-                                    \\     / █ \\       /
-                                     \\   /  █  \\     /
-                                      \\ /   █   \\   /
-                                       X    █    \\ /
-                                      / \\   █   / \\
-                                     /   \\  █  /   \\
-                                    /     \\ █ /     \\
-                                   /       \\█/       \\
-                                  ▼═════════█═════════▼
-`
+// ASCII Pentagram with extended corruption characters
+const PENTAGRAM_CORE = `
+                                              ▲
+                                             ╱█╲
+                                            ╱ █ ╲
+                                           ╱  █  ╲
+                                          ╱   █   ╲
+                                         ╱    █    ╲
+                                        ╱     █     ╲
+                                       ╱      █      ╲
+                                      ╱       █       ╲
+                                     ╱        █        ╲
+                                    ╱         █         ╲
+                                   ╱          █          ╲
+                                  ╱           █           ╲
+                                 ╱            █            ╲
+                                ╱             █             ╲
+                               ╱              █              ╲
+                              ╱               █               ╲
+          ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬╱▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬█▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬╲▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+                             ╲                                 ╱
+                              ╲                               ╱
+                               ╲                             ╱
+                                ╲                           ╱
+                                 ╲                         ╱
+                                  ╲                       ╱
+                                   ╲         ▼           ╱
+                                    ╲       ╱█╲         ╱
+                                     ╲     ╱ █ ╲       ╱
+                                      ╲   ╱  █  ╲     ╱
+                                       ╲ ╱   █   ╲   ╱
+                                        ╳    █    ╲ ╱
+                                       ╱ ╲   █   ╱ ╲
+                                      ╱   ╲  █  ╱   ╲
+                                     ╱     ╲ █ ╱     ╲
+                                    ╱       ╲█╱       ╲
+                                   ▼▬▬▬▬▬▬▬▬▬█▬▬▬▬▬▬▬▬▬▼`
 
-// Circular text for rune rings
-const RUNES_OUTER = '᛫ᚠ᛫ᚢ᛫ᚦ᛫ᚨ᛫ᚱ᛫ᚲ᛫ᚷ᛫ᚹ᛫ᚺ᛫ᚾ᛫ᛁ᛫ᛃ᛫ᛇ᛫ᛈ᛫ᛉ᛫ᛊ᛫ᛏ᛫ᛒ᛫ᛖ᛫ᛗ᛫ᛚ᛫ᛜ᛫ᛞ᛫ᛟ᛫'
+// Glitch characters for bleeding effect
+const GLITCH_CHARS = '█▓▒░╳╱╲▲▼◆◇○●◎⊕⊗⌀∅∆∇≡≢⋮⋯⋰⋱'
+const BLEED_CHARS = '01█▓▒░!@#$%^&*<>{}[]|\\/'
+const RUNES = '᛫ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ'
 
-// Floating occult symbols
-const OCCULT_SYMBOLS = ['☠', '†', '‡', '⛧', '✝', '☽', '☾', '◊', '∞', '⚰', '✞', '⁂', '※', '⌖', '◈', '⛤', '☥', '♱']
-
-interface FloatingSymbol {
+interface GlitchSlice {
   id: number
-  symbol: string
+  top: number
+  height: number
+  offset: number
+  delay: number
+}
+
+interface BleedingChar {
+  id: number
+  char: string
   x: number
   y: number
+  speed: number
+  opacity: number
   size: number
+}
+
+interface FloatingRune {
+  id: number
+  char: string
+  x: number
+  y: number
   delay: number
   duration: number
-  opacity: number
 }
 
-interface RuneChar {
-  char: string
-  angle: number
-}
+const glitchSlices = ref<GlitchSlice[]>([])
+const bleedingChars = ref<BleedingChar[]>([])
+const floatingRunes = ref<FloatingRune[]>([])
+const glitchActive = ref(false)
 
-const floatingSymbols = ref<FloatingSymbol[]>([])
-
-// Generate rune positions in a circle
-const outerRunes = computed<RuneChar[]>(() => {
-  const chars = RUNES_OUTER.split('')
-  return chars.map((char, i) => ({
-    char,
-    angle: (360 / chars.length) * i,
-  }))
-})
-
-const innerRunes = computed<RuneChar[]>(() => {
-  const chars = RUNES_OUTER.split('').reverse()
-  return chars.map((char, i) => ({
-    char,
-    angle: (360 / chars.length) * i,
-  }))
-})
-
-function generateSymbols() {
-  floatingSymbols.value = Array.from({ length: 50 }, (_, i) => ({
+// Generate random glitch slices
+function generateSlices() {
+  glitchSlices.value = Array.from({ length: 8 }, (_, i) => ({
     id: i,
-    symbol: OCCULT_SYMBOLS[Math.floor(Math.random() * OCCULT_SYMBOLS.length)],
+    top: Math.random() * 100,
+    height: 0.5 + Math.random() * 2,
+    offset: (Math.random() - 0.5) * 20,
+    delay: Math.random() * 5,
+  }))
+}
+
+// Generate bleeding/falling characters
+function generateBleedingChars() {
+  bleedingChars.value = Array.from({ length: 60 }, (_, i) => ({
+    id: i,
+    char: BLEED_CHARS[Math.floor(Math.random() * BLEED_CHARS.length)],
     x: Math.random() * 100,
     y: Math.random() * 100,
-    size: 0.8 + Math.random() * 1.5,
-    delay: Math.random() * 15,
-    duration: 20 + Math.random() * 30,
-    opacity: 0.15 + Math.random() * 0.2,
+    speed: 10 + Math.random() * 30,
+    opacity: 0.1 + Math.random() * 0.3,
+    size: 0.6 + Math.random() * 1,
   }))
+}
+
+// Generate floating runes around the pentagram
+function generateRunes() {
+  const runeChars = RUNES.split('')
+  floatingRunes.value = Array.from({ length: 40 }, (_, i) => ({
+    id: i,
+    char: runeChars[Math.floor(Math.random() * runeChars.length)],
+    x: 20 + Math.random() * 60, // Keep near center
+    y: 20 + Math.random() * 60,
+    delay: Math.random() * 10,
+    duration: 15 + Math.random() * 20,
+  }))
+}
+
+// Trigger intense glitch periodically
+function triggerGlitch() {
+  glitchActive.value = true
+  setTimeout(() => {
+    glitchActive.value = false
+  }, 150)
 }
 
 onMounted(() => {
-  generateSymbols()
+  generateSlices()
+  generateBleedingChars()
+  generateRunes()
+  
+  // Random intense glitch every 3-8 seconds
+  setInterval(() => {
+    if (Math.random() > 0.5) {
+      triggerGlitch()
+    }
+  }, 3000 + Math.random() * 5000)
 })
 </script>
 
 <template>
-  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <!-- Base gradient -->
-    <div class="absolute inset-0 bg-gradient-radial" />
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-charcoal">
+    <!-- Base noise texture -->
+    <div class="noise-layer" />
 
-    <!-- Outer rotating rune circle -->
-    <div class="absolute inset-0 flex items-center justify-center">
-      <div class="rune-ring rune-ring-outer">
-        <span
-          v-for="(rune, index) in outerRunes"
-          :key="`outer-${index}`"
-          class="rune-char"
-          :style="{
-            transform: `rotate(${rune.angle}deg) translateY(-42vmin) rotate(-${rune.angle}deg)`,
-          }"
-        >
-          {{ rune.char }}
-        </span>
-      </div>
+    <!-- Chromatic aberration layers - RGB split -->
+    <div class="pentagram-container">
+      <!-- Red channel (offset left) -->
+      <pre 
+        class="pentagram-layer pentagram-red"
+        :class="{ 'glitch-intense': glitchActive }"
+      >{{ PENTAGRAM_CORE }}</pre>
+      
+      <!-- Blue channel (offset right) -->
+      <pre 
+        class="pentagram-layer pentagram-blue"
+        :class="{ 'glitch-intense': glitchActive }"
+      >{{ PENTAGRAM_CORE }}</pre>
+      
+      <!-- Main pentagram (white/bone) -->
+      <pre 
+        class="pentagram-layer pentagram-main"
+        :class="{ 'glitch-intense': glitchActive }"
+      >{{ PENTAGRAM_CORE }}</pre>
     </div>
 
-    <!-- Inner rotating rune circle (opposite direction) -->
-    <div class="absolute inset-0 flex items-center justify-center">
-      <div class="rune-ring rune-ring-inner">
-        <span
-          v-for="(rune, index) in innerRunes"
-          :key="`inner-${index}`"
-          class="rune-char-inner"
-          :style="{
-            transform: `rotate(${rune.angle}deg) translateY(-32vmin) rotate(-${rune.angle}deg)`,
-          }"
-        >
-          {{ rune.char }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Central pentagram -->
-    <div class="absolute inset-0 flex items-center justify-center">
-      <pre class="pentagram select-none">{{ PENTAGRAM }}</pre>
-    </div>
-
-    <!-- Pulsing glow behind pentagram -->
-    <div class="absolute inset-0 flex items-center justify-center">
-      <div class="pentagram-glow" />
-    </div>
-
-    <!-- Floating occult symbols -->
+    <!-- Horizontal glitch slices -->
     <div
-      v-for="sym in floatingSymbols"
-      :key="sym.id"
-      class="absolute select-none floating-symbol"
+      v-for="slice in glitchSlices"
+      :key="slice.id"
+      class="glitch-slice"
       :style="{
-        left: `${sym.x}%`,
-        top: `${sym.y}%`,
-        fontSize: `${sym.size}rem`,
-        animationDelay: `${sym.delay}s`,
-        animationDuration: `${sym.duration}s`,
-        opacity: sym.opacity,
-        color: sym.id % 4 === 0 ? 'var(--color-crimson)' : 'var(--color-ash)',
+        top: `${slice.top}%`,
+        height: `${slice.height}%`,
+        animationDelay: `${slice.delay}s`,
+        '--slice-offset': `${slice.offset}px`,
+      }"
+    />
+
+    <!-- Bleeding/falling characters (Matrix-like) -->
+    <div
+      v-for="char in bleedingChars"
+      :key="char.id"
+      class="bleeding-char"
+      :style="{
+        left: `${char.x}%`,
+        top: `${char.y}%`,
+        fontSize: `${char.size}rem`,
+        opacity: char.opacity,
+        animationDuration: `${char.speed}s`,
       }"
     >
-      {{ sym.symbol }}
+      {{ char.char }}
     </div>
 
-    <!-- Corner pentagrams -->
-    <div class="absolute top-6 left-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
-    <div class="absolute top-6 right-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
-    <div class="absolute bottom-6 left-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
-    <div class="absolute bottom-6 right-6 text-ash opacity-30 text-2xl select-none animate-pulse-slow">⛤</div>
+    <!-- Floating runes around pentagram -->
+    <div
+      v-for="rune in floatingRunes"
+      :key="rune.id"
+      class="floating-rune"
+      :style="{
+        left: `${rune.x}%`,
+        top: `${rune.y}%`,
+        animationDelay: `${rune.delay}s`,
+        animationDuration: `${rune.duration}s`,
+      }"
+    >
+      {{ rune.char }}
+    </div>
+
+    <!-- Scanlines overlay -->
+    <div class="scanlines" />
+
+    <!-- Vignette with chromatic edge -->
+    <div class="vignette" />
+    <div class="chromatic-vignette" />
+
+    <!-- Occasional flash/flicker -->
+    <div class="flicker-overlay" :class="{ active: glitchActive }" />
+
+    <!-- Corner corruption markers -->
+    <div class="corner-glitch top-0 left-0">▓▒░</div>
+    <div class="corner-glitch top-0 right-0">░▒▓</div>
+    <div class="corner-glitch bottom-0 left-0">░▒▓</div>
+    <div class="corner-glitch bottom-0 right-0">▓▒░</div>
 
     <!-- Edge runes -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 text-ash opacity-20 text-sm tracking-[0.5em] select-none">
-      ᛟ᛫ᚠᚢᚦᚨᚱᚲ᛫ᛟ
+    <div class="edge-runes top-2 left-1/2 -translate-x-1/2">
+      ᛟ▓ᚠᚢᚦᚨᚱᚲ▓ᛟ
     </div>
-    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-ash opacity-20 text-sm tracking-[0.5em] select-none">
-      ᛟ᛫ᚠᚢᚦᚨᚱᚲ᛫ᛟ
+    <div class="edge-runes bottom-2 left-1/2 -translate-x-1/2">
+      ᛟ▒ᚷᚹᚺᚾᛁᛃ▒ᛟ
     </div>
-
-    <!-- Scanline effect -->
-    <div class="absolute inset-0 scanlines" />
-
-    <!-- Fog/mist at bottom -->
-    <div class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-charcoal via-charcoal/60 to-transparent" />
-
-    <!-- Vignette -->
-    <div class="absolute inset-0 vignette" />
   </div>
 </template>
 
 <style scoped>
-.bg-gradient-radial {
-  background: 
-    radial-gradient(ellipse at center, rgba(139, 0, 0, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at center, var(--color-charcoal-light) 0%, var(--color-charcoal) 40%, var(--color-charcoal-dark) 100%);
-}
-
-/* Rune ring container */
-.rune-ring {
-  position: relative;
-  width: 1px;
-  height: 1px;
-}
-
-.rune-ring-outer {
-  animation: rotateRunes 180s linear infinite;
-}
-
-.rune-ring-inner {
-  animation: rotateRunesReverse 120s linear infinite;
-}
-
-.rune-char {
+/* Base noise texture */
+.noise-layer {
   position: absolute;
-  font-size: 1.8rem;
-  color: var(--color-bone-muted);
-  opacity: 0.5;
-  text-shadow: 0 0 15px var(--color-crimson);
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  animation: noiseShift 0.5s steps(5) infinite;
 }
 
-.rune-char-inner {
+@keyframes noiseShift {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, 2px); }
+}
+
+/* Pentagram container */
+.pentagram-container {
   position: absolute;
-  font-size: 1.3rem;
-  color: var(--color-crimson);
-  opacity: 0.4;
-  text-shadow: 0 0 10px var(--color-crimson-dark);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes rotateRunes {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes rotateRunesReverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-
-/* Pentagram styling */
-.pentagram {
+.pentagram-layer {
+  position: absolute;
   font-family: 'JetBrains Mono', monospace;
-  font-size: clamp(0.35rem, 1vw, 0.7rem);
-  line-height: 1.1;
-  color: var(--color-crimson);
-  opacity: 0.6;
-  animation: pentagramPulse 6s ease-in-out infinite;
-  text-shadow: 0 0 40px var(--color-crimson), 0 0 80px var(--color-crimson-dark);
+  font-size: clamp(0.25rem, 0.7vw, 0.5rem);
+  line-height: 1;
   white-space: pre;
+  animation: pentagramPulse 4s ease-in-out infinite;
+}
+
+/* RGB Chromatic Aberration */
+.pentagram-red {
+  color: #ff0040;
+  opacity: 0.4;
+  transform: translate(-3px, 0);
+  mix-blend-mode: screen;
+  animation: rgbShiftRed 8s ease-in-out infinite;
+}
+
+.pentagram-blue {
+  color: #00d4ff;
+  opacity: 0.4;
+  transform: translate(3px, 0);
+  mix-blend-mode: screen;
+  animation: rgbShiftBlue 8s ease-in-out infinite;
+}
+
+.pentagram-main {
+  color: var(--color-crimson);
+  opacity: 0.7;
+  text-shadow: 
+    0 0 20px var(--color-crimson),
+    0 0 40px var(--color-crimson-dark),
+    0 0 80px rgba(139, 0, 0, 0.5);
+}
+
+@keyframes rgbShiftRed {
+  0%, 100% { transform: translate(-2px, 0); opacity: 0.3; }
+  25% { transform: translate(-4px, 1px); opacity: 0.5; }
+  50% { transform: translate(-2px, -1px); opacity: 0.3; }
+  75% { transform: translate(-5px, 0); opacity: 0.4; }
+}
+
+@keyframes rgbShiftBlue {
+  0%, 100% { transform: translate(2px, 0); opacity: 0.3; }
+  25% { transform: translate(4px, -1px); opacity: 0.4; }
+  50% { transform: translate(3px, 1px); opacity: 0.5; }
+  75% { transform: translate(2px, 0); opacity: 0.3; }
 }
 
 @keyframes pentagramPulse {
-  0%, 100% { 
-    opacity: 0.25;
-    text-shadow: 0 0 10px var(--color-crimson-dark);
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+/* Intense glitch effect */
+.glitch-intense {
+  animation: glitchShake 0.1s steps(2) infinite !important;
+}
+
+@keyframes glitchShake {
+  0% { transform: translate(0, 0) skewX(0deg); }
+  25% { transform: translate(-5px, 2px) skewX(2deg); }
+  50% { transform: translate(5px, -2px) skewX(-2deg); }
+  75% { transform: translate(-3px, 1px) skewX(1deg); }
+  100% { transform: translate(3px, -1px) skewX(-1deg); }
+}
+
+/* Horizontal glitch slices */
+.glitch-slice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 0, 64, 0.1) 20%,
+    rgba(0, 212, 255, 0.1) 40%,
+    transparent 60%,
+    rgba(255, 0, 64, 0.05) 80%,
+    transparent 100%
+  );
+  animation: sliceGlitch 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sliceGlitch {
+  0%, 90%, 100% { 
+    transform: translateX(0) scaleY(1);
+    opacity: 0;
   }
-  50% { 
-    opacity: 0.45;
-    text-shadow: 0 0 30px var(--color-crimson), 0 0 60px var(--color-crimson-dark);
+  92% {
+    transform: translateX(var(--slice-offset)) scaleY(1.5);
+    opacity: 1;
+  }
+  95% {
+    transform: translateX(calc(var(--slice-offset) * -0.5)) scaleY(0.8);
+    opacity: 0.7;
+  }
+  97% {
+    transform: translateX(var(--slice-offset)) scaleY(1.2);
+    opacity: 0.5;
   }
 }
 
-/* Glow effect */
-.pentagram-glow {
-  width: 50vmin;
-  height: 50vmin;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(139, 0, 0, 0.15) 0%, transparent 60%);
-  animation: glowPulse 6s ease-in-out infinite;
-  filter: blur(20px);
+/* Bleeding/falling characters */
+.bleeding-char {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--color-crimson-dark);
+  text-shadow: 0 0 5px var(--color-crimson);
+  animation: bleedFall linear infinite;
+  pointer-events: none;
 }
 
-@keyframes glowPulse {
-  0%, 100% { 
-    transform: scale(0.9);
-    opacity: 0.3;
+@keyframes bleedFall {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
   }
-  50% { 
-    transform: scale(1.1);
-    opacity: 0.6;
+  10% {
+    opacity: var(--opacity, 0.2);
+  }
+  90% {
+    opacity: var(--opacity, 0.2);
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
   }
 }
 
-/* Floating symbols */
-.floating-symbol {
-  animation: floatOccult 25s ease-in-out infinite;
-  text-shadow: 0 0 5px currentColor;
+/* Floating runes */
+.floating-rune {
+  position: absolute;
+  font-size: 1.2rem;
+  color: var(--color-ash);
+  opacity: 0.3;
+  text-shadow: 0 0 10px var(--color-crimson-dark);
+  animation: runeFloat ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes floatOccult {
+@keyframes runeFloat {
   0%, 100% {
-    transform: translateY(0) translateX(0) rotate(0deg);
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.2;
   }
   25% {
-    transform: translateY(-50px) translateX(25px) rotate(15deg);
+    transform: translate(10px, -20px) rotate(5deg);
+    opacity: 0.4;
   }
   50% {
-    transform: translateY(-25px) translateX(-20px) rotate(-10deg);
+    transform: translate(-5px, -10px) rotate(-3deg);
+    opacity: 0.3;
   }
   75% {
-    transform: translateY(-70px) translateX(15px) rotate(8deg);
+    transform: translate(15px, -30px) rotate(8deg);
+    opacity: 0.35;
   }
 }
 
-/* CRT scanline effect */
+/* Scanlines */
 .scanlines {
+  position: absolute;
+  inset: 0;
   background: repeating-linear-gradient(
     0deg,
     transparent,
@@ -314,21 +431,82 @@ onMounted(() => {
     rgba(0, 0, 0, 0.15) 4px
   );
   pointer-events: none;
-  opacity: 0.4;
+  animation: scanlineFlicker 0.05s steps(2) infinite;
+}
+
+@keyframes scanlineFlicker {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.35; }
 }
 
 /* Vignette */
 .vignette {
-  background: radial-gradient(ellipse at center, transparent 0%, transparent 30%, rgba(0,0,0,0.7) 100%);
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  pointer-events: none;
 }
 
-/* Pulse animation for corners */
-.animate-pulse-slow {
-  animation: pulseSlow 4s ease-in-out infinite;
+/* Chromatic vignette edge */
+.chromatic-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: 
+    inset 0 0 100px rgba(255, 0, 64, 0.1),
+    inset 0 0 200px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
-@keyframes pulseSlow {
+/* Flicker overlay */
+.flicker-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 0, 64, 0);
+  transition: background 0.05s;
+  pointer-events: none;
+}
+
+.flicker-overlay.active {
+  background: rgba(255, 0, 64, 0.1);
+}
+
+/* Corner glitch markers */
+.corner-glitch {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--color-ash);
+  opacity: 0.3;
+  padding: 8px;
+  animation: cornerPulse 3s ease-in-out infinite;
+}
+
+@keyframes cornerPulse {
   0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.4; color: var(--color-crimson-dark); }
+}
+
+/* Edge runes */
+.edge-runes {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--color-ash);
+  opacity: 0.25;
+  letter-spacing: 0.3em;
+  animation: edgeFlicker 5s ease-in-out infinite;
+}
+
+@keyframes edgeFlicker {
+  0%, 100% { opacity: 0.2; }
+  30% { opacity: 0.3; }
+  35% { opacity: 0.1; }
+  40% { opacity: 0.35; }
+  70% { opacity: 0.25; }
 }
 </style>
