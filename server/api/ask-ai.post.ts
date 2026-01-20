@@ -57,8 +57,8 @@ export default defineEventHandler(async (event) => {
             },
           ],
           generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 100,
+            temperature: 0.5,
+            maxOutputTokens: 1000,
           },
         }),
       }
@@ -82,6 +82,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const answer = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Unknown'
+    
+    if (answer === 'Unknown') {
+      console.error(`No answer from Gemini API\n ${JSON.stringify(data.candidates, null, 2)}`);
+    }
 
     return { answer }
   } catch (error: any) {
