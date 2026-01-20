@@ -17,13 +17,13 @@ function selectDifficulty(difficulty: Difficulty) {
 
 <template>
   <div class="flex flex-col items-center gap-6 animate-fade-in">
-    <p class="text-bone-muted text-lg tracking-wide">Choose your fate...</p>
+    <p class="text-muted text-lg tracking-wide">Choose your fate...</p>
     
     <div class="flex flex-col md:flex-row gap-4">
       <button
         v-for="diff in difficulties"
         :key="diff"
-        class="group relative px-8 py-6 min-w-[200px] border border-bone/20 bg-charcoal-light hover:bg-ash-dark transition-all duration-300 hover:border-bone/40"
+        class="group relative px-8 py-6 min-w-[200px] border border-foreground/20 bg-surface hover:bg-accent-hover transition-all duration-300 hover:border-foreground/40"
         @click="selectDifficulty(diff)"
       >
         <!-- Symbol -->
@@ -32,12 +32,12 @@ function selectDifficulty(difficulty: Difficulty) {
         </span>
         
         <!-- Label -->
-        <span class="block text-xl font-bold text-bone tracking-wider">
+        <span class="block text-xl font-bold text-foreground tracking-wider">
           {{ DIFFICULTY_INFO[diff].label }}
         </span>
         
         <!-- Description -->
-        <span class="block text-sm text-bone-muted mt-1">
+        <span class="block text-sm text-muted mt-1">
           {{ DIFFICULTY_INFO[diff].description }}
         </span>
         

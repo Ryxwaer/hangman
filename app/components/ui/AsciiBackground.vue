@@ -22,7 +22,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none -z-10 isolate bg-charcoal">
+  <div class="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none -z-10 isolate bg-background">
     <!-- Video Background -->
     <video
       ref="videoRef"
@@ -42,7 +42,7 @@ onMounted(() => {
     </video>
     
     <!-- Dark overlay for better readability -->
-    <div class="absolute inset-0 bg-charcoal/70" />
+    <div class="absolute inset-0 bg-background/70" />
     
     <!-- Subtle vignette effect -->
     <div 
@@ -51,6 +51,6 @@ onMounted(() => {
     />
     
     <!-- Optional grim color tint -->
-    <div class="absolute inset-0 bg-linear-to-b from-charcoal/30 via-transparent to-crimson/10" />
+    <div class="absolute inset-0 bg-linear-to-b from-background/30 via-transparent to-danger/10" />
   </div>
 </template>

@@ -32,10 +32,10 @@ const letters = computed(() => {
       class="w-8 h-12 md:w-12 md:h-16 flex items-center justify-center border-b-4 transition-all duration-200"
       :class="[
         letter.isGuessed 
-          ? 'border-moss text-bone' 
+          ? 'border-success text-foreground' 
           : letter.isRevealed 
-            ? 'border-crimson text-crimson' 
-            : 'border-ash text-transparent',
+            ? 'border-danger text-danger' 
+            : 'border-accent text-transparent',
       ]"
     >
       <span 

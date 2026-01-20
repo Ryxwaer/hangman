@@ -8,6 +8,7 @@ const question = ref('')
 const isLoading = ref(false)
 const error = ref('')
 const historyContainer = ref<HTMLElement | null>(null)
+const inputRef = ref<HTMLInputElement | null>(null)
 
 interface QAPair {
   question: string
@@ -70,6 +71,15 @@ function togglePanel() {
   isOpen.value = !isOpen.value
 }
 
+// Auto-focus input when panel opens
+watch(isOpen, (open) => {
+  if (open) {
+    nextTick(() => {
+      inputRef.value?.focus()
+    })
+  }
+})
+
 // Get displayed answer - typewriter for latest, full text for others
 function getAnswer(index: number): string {
   if (typingForIndex.value === index) {
@@ -93,97 +103,85 @@ watch(() => gameStore.gameState, (state) => {
 </script>
 
 <template>
-  <div class="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex">
+  <div 
+    class="fixed z-50 flex transition-[right] duration-300 ease-out top-4 md:top-1/2 md:-translate-y-1/2"
+    :class="isOpen ? 'right-0' : '-right-72 md:-right-80'"
+  >
     <!-- Toggle Tab -->
     <button
-      class="h-24 w-8 bg-ash border border-r-0 border-bone/20 flex items-center justify-center text-bone hover:bg-ash-light transition-colors rounded-l"
-      :class="{ 'bg-ash-light': isOpen }"
+      class="h-16 md:h-24 w-7 md:w-8 bg-accent border border-r-0 border-foreground/20 flex items-center justify-center text-foreground hover:bg-accent-hover transition-colors rounded-l shrink-0"
+      :class="{ 'bg-accent-hover': isOpen }"
       @click="togglePanel"
       title="Ask AI for help"
     >
-      <span class="transform -rotate-90 whitespace-nowrap text-sm tracking-wider">
-        {{ isOpen ? '✕ CLOSE' : '? AI HELP' }}
+      <span class="transform -rotate-90 whitespace-nowrap text-xs md:text-sm tracking-wider">
+        {{ isOpen ? '✕' : '? Oracle' }}
       </span>
     </button>
     
     <!-- Panel -->
-    <Transition name="slide">
-      <div
-        v-if="isOpen"
-        class="w-72 md:w-80 h-96 bg-charcoal-light border border-bone/20 flex flex-col shadow-2xl"
-      >
-        <!-- Header -->
-        <div class="p-3 border-b border-bone/10">
-          <h3 class="text-bone font-bold tracking-wide">AI Oracle</h3>
-          <p class="text-bone-muted text-xs">Ask any yes/no question about the word</p>
-        </div>
-        
-        <!-- History -->
-        <div ref="historyContainer" class="flex-1 overflow-y-auto p-3 space-y-3">
-          <div
-            v-for="(qa, index) in history"
-            :key="index"
-            class="text-sm"
-          >
-            <p class="text-bone-muted motion-preset-fade motion-duration-300">
-              <span class="text-bone">Q:</span> {{ qa.question }}
-            </p>
-            <p class="text-moss font-bold mt-1">
-              <span class="text-bone">A:</span> 
-              {{ getAnswer(index) }}<span v-if="isTypingAnswer(index)" class="inline-block w-1.5 h-3 bg-moss ml-0.5 animate-pulse" />
-            </p>
-          </div>
-          
-          <!-- Loading state -->
-          <div v-if="isLoading" class="text-bone-muted text-sm animate-pulse">
-            Consulting the spirits...
-          </div>
-          
-          <!-- Error -->
-          <div v-if="error" class="text-crimson text-sm motion-preset-shake">
-            {{ error }}
-          </div>
-          
-          <!-- Empty state -->
-          <div v-if="!history.length && !isLoading" class="text-ash text-sm text-center py-8">
-            <p>No questions asked yet.</p>
-            <p class="text-xs mt-2">Try: "Does it contain the letter E?"</p>
-          </div>
-        </div>
-        
-        <!-- Input -->
-        <form class="p-3 border-t border-bone/10" @submit.prevent="askQuestion">
-          <div class="flex gap-2">
-            <input
-              v-model="question"
-              type="text"
-              placeholder="Ask a yes/no question..."
-              class="flex-1 bg-charcoal border border-bone/20 px-3 py-2 text-bone text-sm placeholder-ash focus:outline-none focus:border-bone/40"
-              :disabled="isLoading"
-            >
-            <button
-              type="submit"
-              class="px-4 py-2 bg-ash hover:bg-ash-light text-bone text-sm font-bold transition-colors disabled:opacity-50"
-              :disabled="isLoading || !question.trim()"
-            >
-              ASK
-            </button>
-          </div>
-        </form>
+    <div
+      class="w-72 md:w-80 h-72 md:h-96 bg-surface border border-l-0 border-foreground/20 flex flex-col shadow-2xl"
+    >
+      <!-- Header -->
+      <div class="p-3 border-b border-foreground/10">
+        <h3 class="text-foreground font-bold tracking-wide">Oracle</h3>
+        <p class="text-muted text-xs">Ask any yes/no question about the word</p>
       </div>
-    </Transition>
+      
+      <!-- History -->
+      <div ref="historyContainer" class="flex-1 overflow-y-auto p-3 space-y-3">
+        <div
+          v-for="(qa, index) in history"
+          :key="index"
+          class="text-sm"
+        >
+          <p class="text-muted motion-preset-fade motion-duration-300">
+            <span class="text-foreground">Q:</span> {{ qa.question }}
+          </p>
+          <p class="text-success font-bold mt-1">
+            <span class="text-foreground">A:</span> 
+            {{ getAnswer(index) }}<span v-if="isTypingAnswer(index)" class="inline-block w-1.5 h-3 bg-success ml-0.5 animate-pulse" />
+          </p>
+        </div>
+        
+        <!-- Loading state -->
+        <div v-if="isLoading" class="text-muted text-sm animate-pulse">
+          Consulting the spirits...
+        </div>
+        
+        <!-- Error -->
+        <div v-if="error" class="text-danger text-sm motion-preset-shake">
+          {{ error }}
+        </div>
+        
+        <!-- Empty state -->
+        <div v-if="!history.length && !isLoading" class="text-accent text-sm text-center py-8">
+          <p>No questions asked yet.</p>
+          <p class="text-xs mt-2">Try: "Is it an object?"</p>
+        </div>
+      </div>
+      
+      <!-- Input -->
+      <form class="p-3 border-t border-foreground/10" @submit.prevent="askQuestion">
+        <div class="flex gap-2">
+          <input
+            ref="inputRef"
+            v-model="question"
+            type="text"
+            placeholder="Ask a yes/no question..."
+            class="flex-1 bg-background border border-foreground/20 px-3 py-2 text-foreground text-sm placeholder-accent focus:outline-none focus:border-foreground/40"
+            :disabled="isLoading"
+          >
+          <button
+            type="submit"
+            class="px-4 py-2 bg-accent hover:bg-accent-hover text-foreground text-sm font-bold transition-colors disabled:opacity-50"
+            :disabled="isLoading || !question.trim()"
+          >
+            ASK
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.slide-enter-from,
-.slide-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-</style>

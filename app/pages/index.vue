@@ -48,8 +48,8 @@ watch(gameState, (state) => {
   <div class="min-h-screen flex flex-col items-center justify-center p-4">
     <!-- Title -->
     <h1 
-      class="text-4xl md:text-6xl font-bold text-bone mb-8 tracking-wider"
-      :class="{ 'glow-crimson': gameState === 'lost' }"
+      class="text-4xl md:text-6xl font-bold text-foreground mb-8 tracking-wider"
+      :class="{ 'glow-danger': gameState === 'lost' }"
     >
       HANGMAN
     </h1>
@@ -75,10 +75,10 @@ watch(gameState, (state) => {
         />
 
         <!-- Game Status Message -->
-        <div v-if="gameState === 'won'" class="text-moss text-2xl font-bold motion-preset-confetti motion-duration-700">
+        <div v-if="gameState === 'won'" class="text-success text-2xl font-bold motion-preset-confetti motion-duration-700">
           ✓ VICTORY - You survived!
         </div>
-        <div v-else-if="gameState === 'lost'" class="text-crimson text-2xl font-bold motion-preset-shake glow-crimson">
+        <div v-else-if="gameState === 'lost'" class="text-danger text-2xl font-bold motion-preset-shake glow-danger">
           ✗ HANGED - The word was: {{ currentWord }}
         </div>
 
@@ -97,7 +97,7 @@ watch(gameState, (state) => {
             <!-- Explain Button - Cryptic monochromatic style -->
             <button
               v-if="!wordExplanation && !isLoadingExplanation"
-              class="group w-full px-6 py-3 bg-charcoal border border-bone/5 hover:border-bone/20 text-bone-dark hover:text-bone-muted text-xs tracking-[0.3em] uppercase transition-all duration-500 motion-preset-fade"
+              class="group w-full px-6 py-3 bg-background border border-foreground/5 hover:border-foreground/20 text-subtle hover:text-muted text-xs tracking-[0.3em] uppercase transition-all duration-500 motion-preset-fade"
               @click="explainWord"
             >
               <span class="opacity-50 group-hover:opacity-100 transition-opacity duration-500">
@@ -106,25 +106,25 @@ watch(gameState, (state) => {
             </button>
             
             <!-- Loading State -->
-            <div v-if="isLoadingExplanation" class="text-bone-dark text-xs tracking-widest text-center py-4 animate-pulse">
+            <div v-if="isLoadingExplanation" class="text-subtle text-xs tracking-widest text-center py-4 animate-pulse">
               ··· channeling the void ···
             </div>
             
             <!-- Error State -->
-            <div v-if="explanationError" class="text-crimson text-sm text-center py-2 motion-preset-shake">
+            <div v-if="explanationError" class="text-danger text-sm text-center py-2 motion-preset-shake">
               {{ explanationError }}
             </div>
             
             <!-- Explanation Display with Typewriter -->
             <p 
               v-if="wordExplanation" 
-              class="mt-3 p-5 bg-charcoal border border-bone/5 text-bone-muted text-sm leading-relaxed whitespace-pre-line"
-            >{{ displayedText }}<span v-if="isTyping" class="inline-block w-1.5 h-4 bg-bone-muted ml-0.5 animate-pulse" /></p>
+              class="mt-3 p-5 bg-background border border-foreground/5 text-muted text-sm leading-relaxed whitespace-pre-line"
+            >{{ displayedText }}<span v-if="isTyping" class="inline-block w-1.5 h-4 bg-muted ml-0.5 animate-pulse" /></p>
           </div>
 
           <!-- Play Again Button -->
           <button
-            class="mt-2 px-8 py-3 bg-ash hover:bg-ash-light text-bone font-bold tracking-wider transition-colors border border-bone/20 motion-preset-fade motion-delay-300"
+            class="mt-2 px-8 py-3 bg-accent hover:bg-accent-hover text-foreground font-bold tracking-wider transition-colors border border-foreground/20 motion-preset-fade motion-delay-300"
             @click="gameStore.resetGame"
           >
             PLAY AGAIN

@@ -65,9 +65,9 @@ onUnmounted(() => {
         :key="letter"
         class="w-8 h-10 md:w-12 md:h-14 flex items-center justify-center font-bold text-lg md:text-xl transition-all duration-150 border"
         :class="{
-          'bg-ash hover:bg-ash-light border-bone/20 text-bone cursor-pointer': getKeyState(letter) === 'unused',
-          'bg-moss/30 border-moss text-moss cursor-not-allowed': getKeyState(letter) === 'correct',
-          'bg-crimson/30 border-crimson text-crimson cursor-not-allowed': getKeyState(letter) === 'wrong',
+          'bg-accent hover:bg-accent-hover border-foreground/20 text-foreground cursor-pointer': getKeyState(letter) === 'unused',
+          'bg-success/30 border-success text-success cursor-not-allowed': getKeyState(letter) === 'correct',
+          'bg-danger/30 border-danger text-danger cursor-not-allowed': getKeyState(letter) === 'wrong',
         }"
         :disabled="guessedLetters.has(letter)"
         @click="handleKeyClick(letter)"
@@ -77,7 +77,7 @@ onUnmounted(() => {
     </div>
     
     <!-- Hint text -->
-    <p class="text-bone-muted text-sm mt-2">
+    <p class="text-muted text-sm mt-2">
       Click or type a letter
     </p>
   </div>

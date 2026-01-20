@@ -1,28 +1,25 @@
 @import 'tailwindcss';
 @plugin 'tailwindcss-motion';
 
-/* Grim color palette theme */
+/* Semantic color theme */
 @theme {
-  /* Colors */
-  --color-charcoal: #0d0d0d;
-  --color-charcoal-light: #1a1a1a;
-  --color-charcoal-dark: #050505;
+  /* Background layers */
+  --color-background: #0d0d0d;
+  --color-surface: #1a1a1a;
   
-  --color-bone: #e8e8e8;
-  --color-bone-muted: #b8b8b8;
-  --color-bone-dark: #888888;
+  /* Text hierarchy */
+  --color-foreground: #e8e8e8;
+  --color-muted: #b8b8b8;
+  --color-subtle: #888888;
   
-  --color-crimson: #8b0000;
-  --color-crimson-light: #a52a2a;
-  --color-crimson-dark: #5c0000;
+  /* Interactive elements */
+  --color-accent: #3a3a3a;
+  --color-accent-hover: #4a4a4a;
   
-  --color-ash: #3a3a3a;
-  --color-ash-light: #4a4a4a;
-  --color-ash-dark: #2a2a2a;
-  
-  --color-moss: #4a6a4a;
-  --color-moss-light: #5a7a5a;
-  --color-moss-dark: #3a5a3a;
+  /* Feedback states */
+  --color-success: #4a6a4a;
+  --color-danger: #cc2936;
+  --color-warning: #d64545;
 
   /* Font family */
   --font-mono: 'JetBrains Mono', monospace;
@@ -53,7 +50,7 @@
   }
 
   body {
-    @apply text-bone font-mono antialiased;
+    @apply text-foreground font-mono antialiased;
     /* Background is transparent to show video behind */
     background: transparent;
     min-height: 100vh;
@@ -61,7 +58,7 @@
   }
 
   ::selection {
-    @apply bg-crimson text-bone;
+    @apply bg-danger text-foreground;
   }
 
   /* Custom scrollbar */
@@ -70,15 +67,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-charcoal-dark;
+    @apply bg-background;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-ash rounded;
+    @apply bg-accent rounded;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-ash-light;
+    @apply bg-accent-hover;
   }
 }
 
@@ -98,7 +95,7 @@
     text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
   }
 
-  .glow-crimson {
-    text-shadow: 0 0 10px var(--color-crimson), 0 0 20px var(--color-crimson);
+  .glow-danger {
+    text-shadow: 0 0 10px var(--color-danger), 0 0 20px var(--color-danger);
   }
 }
