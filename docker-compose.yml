@@ -13,7 +13,8 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Map GEMINI_API_KEY to NUXT_ prefix for Nuxt runtime config
+      - NUXT_GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
       - nginx-proxy-manager_default
     healthcheck:

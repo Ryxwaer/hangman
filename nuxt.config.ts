@@ -29,6 +29,9 @@ export default defineNuxtConfig({
     display: 'swap',
   },
 
+  // Runtime config - server-side only
+  // Local dev: reads GEMINI_API_KEY from .env at startup
+  // Production: docker-compose maps GEMINI_API_KEY → NUXT_GEMINI_API_KEY
   runtimeConfig: {
     geminiApiKey: process.env.GEMINI_API_KEY || '',
   },
