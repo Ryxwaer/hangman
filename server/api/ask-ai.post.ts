@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
           ],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 50,
+            maxOutputTokens: 100,
           },
         }),
       }
