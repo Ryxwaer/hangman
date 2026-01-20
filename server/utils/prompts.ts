@@ -23,28 +23,20 @@ Your answer:`
  * Prompt for explaining a word after the game ends
  */
 export function getWordExplanationPrompt(word: string): string {
-  return `The word is "${word}".
+  return `The the word "${word}" in a dictionary style:
+(pronunciation) part-of-speech
+Definition in 1-2 sentences
+Origin/etymology in 1 sentence
+Example sentence in quotes
 
-Format EXACTLY like this dictionary style:
-
-(pronunciation) part of speech
-Definition (1-2 sentences)
-Origin (1-2 sentences)
-
-"example sentence"
-
-Example:
+<example>
 (ser-en-DIP-i-tee) noun
-the occurrence of events by chance in a happy way
-derived from the Greek word "serendip" meaning "good fortune"
+The occurrence of events by chance in a happy way.
+From "Serendip", old name for Sri Lanka, coined by Horace Walpole in 1754.
 
-"finding that cafe was pure serendipity"
+"Finding that cafe was pure serendipity"
+</example>
 
-Rules:
-- pronunciation in parentheses, then part of speech
-- short definition
-- blank line
-- example sentence in quotes
-- No word title, no extra text
-- Plain text only`
+Now explain the word "${word}" in the same format (plaintext only):
+`
 }

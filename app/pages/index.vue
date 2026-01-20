@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGameStore } from '~/stores/game'
-import { useTypewriter } from '~/composables/useTypewriter'
 
 const gameStore = useGameStore()
 const { gameState, currentWord, wrongGuesses, guessedLetters, maxWrongGuesses } = storeToRefs(gameStore)
@@ -8,29 +7,70 @@ const { gameState, currentWord, wrongGuesses, guessedLetters, maxWrongGuesses } 
 // Word explanation state
 const wordExplanation = ref('')
 const isLoadingExplanation = ref(false)
+const isStreaming = ref(false)
 const explanationError = ref('')
-
-// Typewriter for explanation
-const { displayedText, isTyping, type: typeText, reset: resetTypewriter } = useTypewriter(15)
 
 async function explainWord() {
   if (isLoadingExplanation.value || wordExplanation.value) return
   
   isLoadingExplanation.value = true
+  isStreaming.value = false
   explanationError.value = ''
+  wordExplanation.value = ''
   
   try {
-    const response = await $fetch('/api/explain-word', {
+    const response = await fetch('/api/explain-word', {
       method: 'POST',
-      body: { word: currentWord.value },
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word: currentWord.value }),
     })
-    wordExplanation.value = response.explanation
-    typeText(response.explanation)
-  } catch (err: any) {
-    explanationError.value = err.data?.message || 'Failed to get explanation'
-    console.error('Explanation error:', err)
-  } finally {
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || 'Failed to get explanation')
+    }
+
+    const reader = response.body?.getReader()
+    if (!reader) throw new Error('No response body')
+
     isLoadingExplanation.value = false
+    isStreaming.value = true
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6).trim()
+          if (data === '[DONE]') {
+            isStreaming.value = false
+            break
+          }
+          try {
+            const parsed = JSON.parse(data)
+            if (parsed.text) {
+              wordExplanation.value += parsed.text
+            }
+          } catch {
+            // Skip malformed JSON
+          }
+        }
+      }
+    }
+    isStreaming.value = false
+  } catch (err: any) {
+    explanationError.value = err.message || 'Failed to get explanation'
+    console.error('Explanation error:', err)
+    isLoadingExplanation.value = false
+    isStreaming.value = false
   }
 }
 
@@ -39,7 +79,7 @@ watch(gameState, (state) => {
   if (state === 'idle') {
     wordExplanation.value = ''
     explanationError.value = ''
-    resetTypewriter()
+    isStreaming.value = false
   }
 })
 </script>
@@ -115,11 +155,13 @@ watch(gameState, (state) => {
               {{ explanationError }}
             </div>
             
-            <!-- Explanation Display with Typewriter -->
-            <p 
-              v-if="wordExplanation" 
-              class="mt-3 p-5 bg-background border border-foreground/5 text-muted text-sm leading-relaxed whitespace-pre-line"
-            >{{ displayedText }}<span v-if="isTyping" class="inline-block w-1.5 h-4 bg-muted ml-0.5 animate-pulse" /></p>
+            <!-- Explanation Display with Streaming -->
+            <div 
+              v-if="wordExplanation || isStreaming" 
+              class="mt-3 p-5 bg-background border border-foreground/5 text-muted text-sm leading-relaxed whitespace-pre-line motion-preset-blur-up motion-duration-500"
+            >
+              <p>{{ wordExplanation }}<span v-if="isStreaming" class="inline-block w-1.5 h-4 bg-muted ml-0.5 animate-pulse" /></p>
+            </div>
           </div>
 
           <!-- Play Again Button -->

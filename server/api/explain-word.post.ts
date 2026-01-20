@@ -1,21 +1,8 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, createError, setResponseHeader } from 'h3'
 import { getWordExplanationPrompt } from '../utils/prompts'
 
 interface ExplainWordRequest {
   word: string
-}
-
-interface GeminiResponse {
-  candidates?: Array<{
-    content: {
-      parts: Array<{
-        text: string
-      }>
-    }
-  }>
-  error?: {
-    message: string
-  }
 }
 
 export default defineEventHandler(async (event) => {
@@ -40,9 +27,14 @@ export default defineEventHandler(async (event) => {
 
   const prompt = getWordExplanationPrompt(body.word)
 
+  // Set headers for Server-Sent Events
+  setResponseHeader(event, 'Content-Type', 'text/event-stream')
+  setResponseHeader(event, 'Cache-Control', 'no-cache')
+  setResponseHeader(event, 'Connection', 'keep-alive')
+
   try {
     const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse',
       {
         method: 'POST',
         headers: {
@@ -57,36 +49,80 @@ export default defineEventHandler(async (event) => {
           ],
           generationConfig: {
             temperature: 0.5,
-            maxOutputTokens: 300,
+            maxOutputTokens: 1000,
           },
         }),
       }
     )
 
-    const data: GeminiResponse = await response.json()
-
     // Handle rate limit errors
-    if (response.status === 429 || (data.error?.message && data.error.message.includes('quota'))) {
+    if (response.status === 429) {
       throw createError({
         statusCode: 429,
         message: 'The spirits are exhausted... Please wait a moment.',
       })
     }
 
-    if (data.error) {
+    if (!response.ok) {
+      const errorData = await response.json()
       throw createError({
-        statusCode: 500,
-        message: data.error.message,
+        statusCode: response.status,
+        message: errorData.error?.message || 'API request failed',
       })
     }
 
-    const explanation = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'No explanation available.'
+    // Stream the response
+    const reader = response.body?.getReader()
+    if (!reader) {
+      throw createError({
+        statusCode: 500,
+        message: 'No response body',
+      })
+    }
 
-    return { explanation }
+    const decoder = new TextDecoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) {
+              controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'))
+              controller.close()
+              break
+            }
+
+            const chunk = decoder.decode(value, { stream: true })
+            // Parse SSE data from Gemini
+            const lines = chunk.split('\n')
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const jsonStr = line.slice(6)
+                if (jsonStr.trim()) {
+                  try {
+                    const data = JSON.parse(jsonStr)
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+                    if (text) {
+                      // Send as SSE format
+                      controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ text })}\n\n`))
+                    }
+                  } catch {
+                    // Skip malformed JSON
+                  }
+                }
+              }
+            }
+          }
+        } catch (error) {
+          controller.error(error)
+        }
+      },
+    })
+
+    return stream
   } catch (error: any) {
     console.error('Gemini API error:', error)
     
-    // Re-throw if it's already a proper error
     if (error.statusCode) {
       throw error
     }

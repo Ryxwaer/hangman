@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGameStore } from '~/stores/game'
-import { useTypewriter } from '~/composables/useTypewriter'
 
 const gameStore = useGameStore()
 const isOpen = ref(false)
@@ -17,10 +16,6 @@ interface QAPair {
 
 const history = ref<QAPair[]>([])
 
-// Typewriter for latest answer
-const { displayedText: typedAnswer, isTyping, type: typeAnswer, reset: resetTypewriter } = useTypewriter(25)
-const typingForIndex = ref<number | null>(null)
-
 // Auto-scroll to bottom when history changes
 function scrollToBottom() {
   nextTick(() => {
@@ -32,7 +27,6 @@ function scrollToBottom() {
 
 watch(history, scrollToBottom, { deep: true })
 watch(isLoading, scrollToBottom)
-watch(typedAnswer, scrollToBottom)
 
 async function askQuestion() {
   if (!question.value.trim() || isLoading.value) return
@@ -55,13 +49,10 @@ async function askQuestion() {
       question: currentQuestion,
       answer: response.answer,
     })
-    
-    // Start typewriter for the new answer
-    typingForIndex.value = history.value.length - 1
-    typeAnswer(response.answer)
   } catch (err: any) {
     error.value = err.data?.message || 'Failed to get answer'
-    console.error('AI Error:', err)
+    console.error('AI Error (full):', JSON.stringify(err, null, 2))
+    console.error('AI Error (original):', err)
   } finally {
     isLoading.value = false
   }
@@ -80,24 +71,10 @@ watch(isOpen, (open) => {
   }
 })
 
-// Get displayed answer - typewriter for latest, full text for others
-function getAnswer(index: number): string {
-  if (typingForIndex.value === index) {
-    return typedAnswer.value
-  }
-  return history.value[index]?.answer || ''
-}
-
-function isTypingAnswer(index: number): boolean {
-  return typingForIndex.value === index && isTyping.value
-}
-
 // Reset history when game restarts
 watch(() => gameStore.gameState, (state) => {
   if (state === 'idle') {
     history.value = []
-    resetTypewriter()
-    typingForIndex.value = null
   }
 })
 </script>
@@ -139,9 +116,8 @@ watch(() => gameStore.gameState, (state) => {
           <p class="text-muted motion-preset-fade motion-duration-300">
             <span class="text-foreground">Q:</span> {{ qa.question }}
           </p>
-          <p class="text-success font-bold mt-1">
-            <span class="text-foreground">A:</span> 
-            {{ getAnswer(index) }}<span v-if="isTypingAnswer(index)" class="inline-block w-1.5 h-3 bg-success ml-0.5 animate-pulse" />
+          <p class="text-success font-bold mt-1 motion-preset-typewriter-[20] motion-duration-500">
+            <span class="text-foreground">A:</span> {{ qa.answer }}
           </p>
         </div>
         
