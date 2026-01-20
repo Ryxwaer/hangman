@@ -12,9 +12,9 @@ export function getQuestionPrompt(word: string, question: string): string {
 The player asks: "${question}"
 
 IMPORTANT RULES:
-1. You must answer ONLY with "Yes" or "No"
+1. Answer ONLY with the equivalent of "Yes", "No", or "Uncertain" in the SAME LANGUAGE as the question
 2. Do not reveal the word or any letters directly
-4. If the question cannot be answered with yes/no, respond with "Uncertain"
+3. Examples: English→Yes/No, Spanish→Sí/No, German→Ja/Nein, French→Oui/Non, etc.
 
 Your answer:`
 }
