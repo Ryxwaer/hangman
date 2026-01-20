@@ -38,7 +38,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Hangman - ASCII Horror',
+      title: 'Hangman - ASCII',
       meta: [
         { name: 'description', content: 'A grim ASCII hangman game with AI-powered hints' },
         // Theme color for all platforms

@@ -170,7 +170,7 @@ watch(() => gameStore.gameState, (state) => {
             v-model="question"
             type="text"
             placeholder="Ask a yes/no question..."
-            class="flex-1 bg-background border border-foreground/20 px-3 py-2 text-foreground text-sm placeholder-accent focus:outline-none focus:border-foreground/40"
+            class="flex-1 bg-background border border-foreground/20 px-3 py-2 text-foreground text-base md:text-sm placeholder-accent focus:outline-none focus:border-foreground/40"
             :disabled="isLoading"
           >
           <button
