@@ -106,6 +106,11 @@ export default defineEventHandler(async (event) => {
                       // Send as SSE format
                       controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ text })}\n\n`))
                     }
+                    // Log token usage (usually in last chunk)
+                    if (data.usageMetadata) {
+                      const u = data.usageMetadata
+                      console.log(`[explain-word] Tokens: prompt=${u.promptTokenCount}, output=${u.candidatesTokenCount}, total=${u.totalTokenCount}${u.thoughtsTokenCount ? `, thoughts=${u.thoughtsTokenCount}` : ''}`)
+                    }
                   } catch {
                     // Skip malformed JSON
                   }

@@ -14,6 +14,12 @@ interface GeminiResponse {
       }>
     }
   }>
+  usageMetadata?: {
+    promptTokenCount: number
+    candidatesTokenCount: number
+    totalTokenCount: number
+    thoughtsTokenCount?: number
+  }
   error?: {
     message: string
   }
@@ -82,6 +88,11 @@ export default defineEventHandler(async (event) => {
     }
 
     const answer = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Unknown'
+    
+    // Log token usage
+    if (data.usageMetadata) {
+      console.log(`[ask-ai] Tokens: prompt=${data.usageMetadata.promptTokenCount}, output=${data.usageMetadata.candidatesTokenCount}, total=${data.usageMetadata.totalTokenCount}${data.usageMetadata.thoughtsTokenCount ? `, thoughts=${data.usageMetadata.thoughtsTokenCount}` : ''}`)
+    }
     
     if (answer === 'Unknown') {
       console.error(`No answer from Gemini API\n ${JSON.stringify(data.candidates, null, 2)}`);
