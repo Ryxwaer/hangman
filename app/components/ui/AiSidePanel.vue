@@ -105,7 +105,7 @@ watch(() => gameStore.gameState, (state) => {
 <template>
   <div 
     class="fixed z-50 flex transition-[right] duration-300 ease-out top-4 md:top-1/2 md:-translate-y-1/2"
-    :class="isOpen ? 'right-0' : '-right-72 md:-right-80'"
+    :class="isOpen ? 'right-0' : '-right-64 md:-right-80'"
   >
     <!-- Toggle Tab -->
     <button
@@ -121,7 +121,7 @@ watch(() => gameStore.gameState, (state) => {
     
     <!-- Panel -->
     <div
-      class="w-72 md:w-80 h-72 md:h-96 bg-surface border border-l-0 border-foreground/20 flex flex-col shadow-2xl"
+      class="w-64 md:w-80 h-72 md:h-96 bg-surface border border-l-0 border-foreground/20 flex flex-col shadow-2xl"
     >
       <!-- Header -->
       <div class="p-3 border-b border-foreground/10">
@@ -163,19 +163,19 @@ watch(() => gameStore.gameState, (state) => {
       </div>
       
       <!-- Input -->
-      <form class="p-3 border-t border-foreground/10" @submit.prevent="askQuestion">
-        <div class="flex gap-2">
+      <form class="p-2 md:p-3 border-t border-foreground/10" @submit.prevent="askQuestion">
+        <div class="flex gap-1 md:gap-2">
           <input
             ref="inputRef"
             v-model="question"
             type="text"
-            placeholder="Ask a yes/no question..."
-            class="flex-1 bg-background border border-foreground/20 px-3 py-2 text-foreground text-base md:text-sm placeholder-accent focus:outline-none focus:border-foreground/40"
+            placeholder="Yes/no question..."
+            class="flex-1 min-w-0 bg-background border border-foreground/20 px-2 md:px-3 py-2 text-foreground text-base md:text-sm placeholder-accent focus:outline-none focus:border-foreground/40"
             :disabled="isLoading"
           >
           <button
             type="submit"
-            class="px-4 py-2 bg-accent hover:bg-accent-hover text-foreground text-sm font-bold transition-colors disabled:opacity-50"
+            class="px-3 md:px-4 py-2 bg-accent hover:bg-accent-hover text-foreground text-sm font-bold transition-colors disabled:opacity-50 shrink-0"
             :disabled="isLoading || !question.trim()"
           >
             ASK
